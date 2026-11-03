@@ -1,0 +1,59 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const posts = (await getCollection('posts', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+// 按 年 → 月 分组
+const grouped = new Map<number, Map<number, typeof posts>>();
+for (const p of posts) {
+  const y = p.data.date.getFullYear();
+  const m = p.data.date.getMonth() + 1;
+  if (!grouped.has(y)) grouped.set(y, new Map());
+  const months = grouped.get(y)!;
+  if (!months.has(m)) months.set(m, []);
+  months.get(m)!.push(p);
+}
+const years = [...grouped.keys()].sort((a, b) => b - a);
+
+function pad(n: number) { return String(n).padStart(2, '0'); }
+---
+
+<BaseLayout title="文章 - 阿文的博客" description="全部文章，按时间归档" active="posts">
+  <section class="container" style="padding-top: 2.5rem; padding-bottom: 3rem;">
+    <h1 style="font-size: 2em; margin-bottom: 0.2em;">文章</h1>
+    <p style="color: var(--text-muted); margin-top: 0;">共 {posts.length} 篇 · 记录知识与思考沿途碰撞的痕迹</p>
+
+    {years.map((year) => (
+      <div class="year-group">
+        <h2 class="year-title">{year}</h2>
+        {[...grouped.get(year)!.keys()].sort((a, b) => b - a).map((month) => (
+          <div class="month-group">
+            <div class="month-title">{pad(month)}月 · {grouped.get(year)!.get(month)!.length} 篇</div>
+            {grouped.get(year)!.get(month)!.map((post) => (
+              <a class="post-card" href={`/posts/${post.slug}/`} style="margin-bottom: 1rem;">
+                {post.data.cover && <img src={post.data.cover} alt={post.data.title} class="post-cover" loading="lazy" />}
+                <div class="post-card-body">
+                  <div class="post-meta">
+                    <time datetime={post.data.date.toISOString().slice(0, 10)}>
+                      {pad(month)}-{pad(post.data.date.getDate())}
+                    </time>
+                    <span>· {Math.max(1, Math.round((post.body?.match(/\S+/g)?.length ?? 300) / 350))} min</span>
+                    {post.data.tags.slice(0, 2).map((t) => <span class="tag">#{t}</span>)}
+                  </div>
+                  <h2><a>{post.data.title}</a></h2>
+                  {post.data.summary && <p class="summary">{post.data.summary}</p>}
+                </div>
+              </a>
+            ))}
+          </div>
+        ))}
+      </div>
+    ))}
+
+    {posts.length === 0 && (
+      <p style="color: var(--text-muted); text-align: center; padding: 3em 0;">还没有文章。</p>
+    )}
+  </section>
+</BaseLayout>
