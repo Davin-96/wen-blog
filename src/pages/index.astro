@@ -1,0 +1,43 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const posts = (await getCollection('posts', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+  .slice(0, 5);
+---
+
+<BaseLayout title="阿文的博客" active="home">
+  <section class="container" style="padding-top: 2.5rem; padding-bottom: 1rem;">
+    <h1 style="font-size: 2.2em; margin-bottom: 0.2em;">你好，我是阿文。</h1>
+    <p style="color: var(--text-muted); font-size: 1.05em; margin-top: 0;">
+      记录知识与思考沿途碰撞的痕迹。这里写技术，也写生活。
+    </p>
+  </section>
+
+  <section class="container-wide" style="padding-top: 1.5rem; padding-bottom: 3rem;">
+    {posts.map((post) => (
+      <a class="post-card" href={`/posts/${post.slug}/`} style="margin-bottom: 1.5rem;">
+        {post.data.cover && <img src={post.data.cover} alt={post.data.title} class="post-cover" loading="lazy" />}
+        <div class="post-card-body">
+          <div class="post-meta">
+            <time datetime={post.data.date.toISOString().slice(0, 10)}>
+              {post.data.date.toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' })}
+            </time>
+            {post.data.tags.slice(0, 2).map((t) => <span class="tag">#{t}</span>)}
+          </div>
+          <h2><a>{post.data.title}</a></h2>
+          {post.data.summary && <p class="summary">{post.data.summary}</p>}
+        </div>
+      </a>
+    ))}
+
+    {posts.length === 0 && (
+      <p style="color: var(--text-muted); text-align: center; padding: 3em 0;">还没有文章，去工作台写第一篇吧。</p>
+    )}
+
+    <div style="text-align: center; margin-top: 2.5rem;">
+      <a href="/posts/" style="color: var(--text-muted); font-size: 0.95em;">查看全部文章 →</a>
+    </div>
+  </section>
+</BaseLayout>
