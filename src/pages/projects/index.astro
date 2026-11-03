@@ -1,0 +1,23 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+// 项目列表：工作台可直接编辑此数组，或在 admin/data/projects.json 中维护
+const projects = [
+  { name: '视频文案提取工具', url: 'https://example.com', desc: 'yt-dlp + ffmpeg + faster-whisper，批量提取热门视频文案用于拆解分析。' },
+  { name: '古建筑地图导览', url: 'https://gujian-map-15286.app.workbuddy.host/', desc: '全国古建筑在线地图，收录 1218 处古建，覆盖 35 省。' },
+  { name: '照片排版工具', url: '', desc: '九宫格照片排版：边框圆角、独立平移缩放、联动调整。' },
+];
+---
+
+<BaseLayout title="项目 - 阿文的博客" active="projects">
+  <section class="container-wide" style="padding-top: 2.5rem; padding-bottom: 3rem;">
+    <h1 style="font-size: 2em; margin-bottom: 0.2em;">项目</h1>
+    <p style="color: var(--text-muted); margin-top: 0;">一些动手做过的东西。</p>
+    {projects.map((p) => (
+      <a class="project-card" href={p.url || '#'} target={p.url ? '_blank' : undefined} rel="noopener">
+        <h3><a>{p.name}</a></h3>
+        <p>{p.desc}</p>
+      </a>
+    ))}
+  </section>
+</BaseLayout>
