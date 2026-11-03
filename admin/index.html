@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>博客工作台</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0d0d0f;--panel:#16161a;--border:#2a2a2e;--text:#a0a0a8;--text2:#e8e8ee;--accent:#f97316;--green:#22c55e;--red:#ef4444;--radius:10px}
+body{background:var(--bg);color:var(--text);font:14px/1.7 system-ui,-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;min-height:100vh}
+#app{max-width:1200px;margin:0 auto;padding:0 20px}
+/* 顶栏 */
+header{position:sticky;top:0;z-index:10;background:rgba(13,13,15,.85);backdrop-filter:blur(8px);border-bottom:1px solid var(--border);margin:0 -20px 0}
+header .bar{max-width:1200px;margin:0 auto;display:flex;align-items:center;gap:16px;padding:14px 20px}
+header h1{font-size:17px;color:var(--text2);font-weight:700;white-space:nowrap}
+header h1 span{color:var(--accent)}
+.tabs{display:flex;gap:4px}
+.tab{padding:6px 16px;border-radius:8px;cursor:pointer;font-size:14px;color:var(--text);transition:all .2s}
+.tab:hover{background:var(--panel)}
+.tab.active{background:var(--panel);color:var(--accent)}
+.header-right{margin-left:auto;font-size:12px;color:var(--text);display:flex;align-items:center;gap:12px}
+/* 卡片 */
+.card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px}
+.card h2{font-size:15px;color:var(--text2);margin-bottom:14px}
+/* 文章列表 */
+.post-row{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--border);border-radius:8px;margin-bottom:8px;background:var(--bg);transition:border-color .2s}
+.post-row:hover{border-color:var(--accent)}
+.post-row .ptitle{flex:1;color:var(--text2);font-weight:600;cursor:pointer}
+.post-row .pdate{color:var(--text);font-size:13px;white-space:nowrap}
+.post-row .ptag{background:var(--border);color:var(--accent);padding:2px 8px;border-radius:12px;font-size:12px}
+.post-row .pdel{color:var(--red);cursor:pointer;opacity:.6;font-size:16px;border:none;background:none;padding:4px}
+.post-row .pdel:hover{opacity:1}
+.new-btn{width:100%;padding:12px;border:1px dashed var(--border);border-radius:8px;color:var(--text);cursor:pointer;font-size:14px;background:transparent;transition:all .2s}
+.new-btn:hover{border-color:var(--accent);color:var(--accent)}
+/* 编辑器 */
+.editor-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:800px){.editor-grid{grid-template-columns:1fr}}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:13px;color:var(--text);margin-bottom:6px}
+.field input,.field textarea,.field select{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text2);border-radius:8px;padding:8px 12px;font:inherit;font-size:14px}
+.field input:focus,.field textarea:focus,.field select:focus{outline:none;border-color:var(--accent)}
+.field textarea{min-height:320px;font-family:var(--font-mono,monospace);font-size:13px;line-height:1.6;resize:vertical}
+.preview-box{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:16px;min-height:320px;overflow-y:auto;max-height:520px;font-size:15px;line-height:1.85}
+.preview-box h1{font-size:1.6em;color:#f4f4f5;margin:0 0 .5em}
+.preview-box h2{font-size:1.3em;color:#f4f4f5;margin:1em 0 .5em}
+.preview-box h3{font-size:1.1em;color:#f4f4f5;margin:.8em 0 .4em}
+.preview-box p{margin:0 0 1em}
+.preview-box code{background:#27272a;padding:2px 6px;border-radius:4px;color:#fb923c;font-size:.9em}
+.preview-box pre{background:#18181b;border:1px solid #3f3f46;border-radius:8px;padding:12px;overflow-x:auto;margin:1em 0}
+.preview-box pre code{background:none;padding:0}
+.preview-box blockquote{border-left:3px solid var(--accent);padding:4px 14px;color:#71717a;font-style:italic;margin:1em 0}
+.preview-box ul,.preview-box ol{padding-left:1.5em;margin:0 0 1em}
+.preview-box li{margin:3px 0}
+.preview-box hr{border:none;border-top:1px solid #3f3f46;margin:1.5em 0}
+.preview-box table{width:100%;border-collapse:collapse;margin:1em 0}
+.preview-box th,.preview-box td{border:1px solid #3f3f46;padding:6px 10px}
+.preview-box th{background:#18181b;color:#f4f4f5}
+.btn{padding:8px 20px;border-radius:8px;border:none;cursor:pointer;font-size:14px;font-weight:600;transition:all .2s}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:#ea580c}
+.btn-ghost{background:var(--panel);color:var(--text2);border:1px solid var(--border)}
+.btn-ghost:hover{border-color:var(--accent)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+/* 主题编辑器 */
+.theme-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:800px){.theme-grid{grid-template-columns:1fr}}
+.theme-field{margin-bottom:16px}
+.theme-field label{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--text);margin-bottom:6px}
+.theme-field label input{width:80px;text-align:right;background:var(--bg);border:1px solid var(--border);color:var(--text2);border-radius:6px;padding:4px 8px;font-size:12px;font-family:monospace}
+.theme-field input[type=range]{width:100%}
+.color-row{display:flex;align-items:center;gap:10px}
+.color-row input[type=color]{width:40px;height:32px;border:1px solid var(--border);border-radius:6px;background:var(--bg);cursor:pointer}
+.theme-preview{border:1px solid var(--border);border-radius:10px;padding:24px;margin-top:8px}
+.theme-preview h2{color:var(--pv-text-strong,#f4f4f5);margin-bottom:8px}
+.theme-preview p{color:var(--pv-text,#a1a1aa);margin-bottom:8px}
+.theme-preview a{color:var(--pv-primary,#f97316)}
+.theme-preview code{background:var(--pv-surface2,#27272a);color:var(--pv-accent,#fb923c);padding:2px 6px;border-radius:4px}
+.theme-preview blockquote{border-left:3px solid var(--pv-primary,#f97316);color:var(--pv-text-muted,#71717a);padding:4px 14px;margin:8px 0}
+/* git */
+.git-status{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;font-family:monospace;font-size:12px;color:var(--text);white-space:pre-wrap;word-break:break-all;margin-bottom:12px;min-height:40px}
+.git-row{display:flex;gap:8px;align-items:center}
+.git-row input{flex:1;background:var(--bg);border:1px solid var(--border);color:var(--text2);border-radius:8px;padding:8px 12px;font-size:14px}
+/* toast */
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--panel);border:1px solid var(--border);color:var(--text2);padding:10px 24px;border-radius:8px;font-size:14px;opacity:0;transition:opacity .3s;z-index:99;pointer-events:none}
+#toast.show{opacity:1}
+/* 隐藏 */
+.hidden{display:none!important}
+/* markdown 预览隐藏时不占空间 */
+.editor-grid .preview-box{display:none}
+.editor-grid.show-preview .editor-pane{display:none}
+.editor-grid.show-preview .preview-box{display:block}
+</style>
+</head>
+<body>
+<div id="app">
+<header>
+  <div class="bar">
+    <h1>博客<span>工作台</span></h1>
+    <div class="tabs">
+      <div class="tab active" data-tab="posts">文章</div>
+      <div class="tab" data-tab="theme">主题</div>
+      <div class="tab" data-tab="git">发布</div>
+    </div>
+    <div class="header-right"><span id="conn">●</span></div>
+  </div>
+</header>
+
+<!-- ========== 文章 ========== -->
+<div id="tab-posts">
+  <div id="postList">
+    <div class="card">
+      <h2>文章列表</h2>
+      <div id="postRows"></div>
+    </div>
+    <button class="new-btn" onclick="editPost(null)">+ 写新文章</button>
+  </div>
+
+  <div id="postEditor" class="hidden">
+    <div class="card">
+      <h2 id="editorTitle">编辑文章</h2>
+      <div class="field">
+        <label>标题（用作文件名，决定 URL）</label>
+        <input id="fSlug" placeholder="如：my-first-post">
+      </div>
+      <div class="editor-grid" id="editorGrid">
+        <div class="editor-pane">
+          <div class="field">
+            <label>显示标题</label>
+            <input id="fTitle" placeholder="文章标题">
+          </div>
+          <div class="field">
+            <label>日期</label>
+            <input id="fDate" type="date">
+          </div>
+          <div class="field">
+            <label>标签（逗号分隔）</label>
+            <input id="fTags" placeholder="技术, 随笔">
+          </div>
+          <div class="field">
+            <label>摘要</label>
+            <input id="fSummary" placeholder="一句话摘要">
+          </div>
+          <div class="field">
+            <label>封面图 URL（可选）</label>
+            <input id="fCover" placeholder="https://...">
+          </div>
+          <div class="field">
+            <label>草稿</label>
+            <label style="display:flex;gap:6px;align-items:center;font-size:13px;color:var(--text)"><input type="checkbox" id="fDraft" style="width:auto"> 标记为草稿（不出现在前台）</label>
+          </div>
+          <div class="field">
+            <label>正文（Markdown）</label>
+            <textarea id="fBody" placeholder="在此输入正文……"></textarea>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-primary" onclick="savePost()">保存</button>
+            <button class="btn btn-ghost" onclick="togglePreview()">预览</button>
+            <button class="btn btn-ghost" onclick="cancelEdit()">取消</button>
+          </div>
+        </div>
+        <div class="preview-box" id="previewBox"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 主题 ========== -->
+<div id="tab-theme" class="hidden">
+  <div class="theme-grid">
+    <div>
+      <div class="card">
+        <h2>配色</h2>
+        <div class="theme-field"><label>主色 <input type="text" id="tPrimary" class="hex"></label><div class="color-row"><input type="color" id="tPrimaryC" oninput="syncColor('tPrimary','tPrimaryC')"><input type="range" min="0" max="360" id="tPrimaryR" oninput="syncHue('tPrimaryR','tPrimary')"></div></div>
+        <div class="theme-field"><label>强调色 <input type="text" id="tAccent" class="hex"></label><div class="color-row"><input type="color" id="tAccentC" oninput="syncColor('tAccent','tAccentC')"></div></div>
+        <div class="theme-field"><label>背景色</label><div class="color-row"><input type="color" id="tBg" oninput="syncColor('tBg','tBgC')"><input type="text" id="tBgC" class="hex" oninput="syncColor('tBgC','tBg')"></div></div>
+        <div class="theme-field"><label>卡片底色</label><div class="color-row"><input type="color" id="tSurface" oninput="syncColor('tSurface','tSurfaceC')"><input type="text" id="tSurfaceC" class="hex" oninput="syncColor('tSurfaceC','tSurface')"></div></div>
+        <div class="theme-field"><label>边框色</label><div class="color-row"><input type="color" id="tBorder" oninput="syncColor('tBorder','tBorderC')"><input type="text" id="tBorderC" class="hex" oninput="syncColor('tBorderC','tBorder')"></div></div>
+        <div class="theme-field"><label>正文颜色</label><div class="color-row"><input type="color" id="tText" oninput="syncColor('tText','tTextC')"><input type="text" id="tTextC" class="hex" oninput="syncColor('tTextC','tText')"></div></div>
+        <div class="theme-field"><label>标题颜色</label><div class="color-row"><input type="color" id="tTextStrong" oninput="syncColor('tTextStrong','tTextStrongC')"><input type="text" id="tTextStrongC" class="hex" oninput="syncColor('tTextStrongC','tTextStrong')"></div></div>
+        <div class="theme-field"><label>次要文字</label><div class="color-row"><input type="color" id="tTextMuted" oninput="syncColor('tTextMuted','tTextMutedC')"><input type="text" id="tTextMutedC" class="hex" oninput="syncColor('tTextMutedC','tTextMuted')"></div></div>
+      </div>
+      <div class="card">
+        <h2>排版</h2>
+        <div class="theme-field"><label>正文字号 <input type="text" id="tFontSize" class="hex"></label><input type="range" min="14" max="22" step="1" id="tFontSizeR" oninput="syncPx('tFontSizeR','tFontSize','px')"></div>
+        <div class="theme-field"><label>行距 <input type="text" id="tLineHeight" class="hex"></label><input type="range" min="1.4" max="2.2" step="0.05" id="tLineHeightR" oninput="syncNum('tLineHeightR','tLineHeight')"></div>
+        <div class="theme-field"><label>圆角 <input type="text" id="tRadius" class="hex"></label><input type="range" min="0" max="24" step="1" id="tRadiusR" oninput="syncPx('tRadiusR','tRadius','px')"></div>
+        <div class="theme-field"><label>阅读栏宽度 <input type="text" id="tMaxWidth" class="hex"></label><input type="range" min="560" max="960" step="10" id="tMaxWidthR" oninput="syncPx('tMaxWidthR','tMaxWidth','px')"></div>
+        <div class="theme-field"><label>字体族</label>
+          <select id="tFont">
+            <option value="system-ui, -apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif">系统无衬线</option>
+            <option value="Georgia, 'Songti SC', 'SimSun', serif">衬线（宋体感）</option>
+            <option value="'Cascadia Code', 'Fira Code', Consolas, monospace">等宽（代码感）</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-primary" onclick="saveTheme()">保存主题</button>
+        <button class="btn btn-ghost" onclick="resetTheme()">恢复默认</button>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <h2>实时预览</h2>
+        <div class="theme-preview" id="themePreview"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 发布 ========== -->
+<div id="tab-git" class="hidden">
+  <div class="card">
+    <h2>Git 状态</h2>
+    <div class="git-status" id="gitStatus">加载中……</div>
+    <div style="font-size:13px;color:var(--text);margin-bottom:12px" id="gitBranch"></div>
+    <div class="field">
+      <label>提交说明</label>
+      <input id="gitMsg" placeholder="本次更新的内容">
+    </div>
+    <div class="git-row">
+      <button class="btn btn-primary" onclick="doCommit()">提交</button>
+      <button class="btn btn-ghost" onclick="doPush()">推送到 GitHub</button>
+    </div>
+    <p style="font-size:13px;color:var(--text);margin-top:12px;line-height:1.6">
+      推送后 GitHub Actions 会自动构建并部署到 GitHub Pages。
+      首次使用前需在仓库 Settings → Pages 中选择 "GitHub Actions" 作为来源。
+    </p>
+  </div>
+</div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+const api = async (m, u, d) => { const r = await fetch(u, {method:m, headers:{'Content-Type':'application/json'}, body:d?JSON.stringify(d):undefined}); return r.json(); };
+const toast = t => { const el = $('toast'); el.textContent = t; el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 2500); };
+
+/* ---- tab 切换 ---- */
+document.querySelectorAll('.tab').forEach(t => t.onclick = () => {
+  document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+  t.classList.add('active');
+  const name = t.dataset.tab;
+  ['posts','theme','git'].forEach(k => $('tab-' + k).classList.toggle('hidden', k !== name));
+  if (name === 'git') refreshGit();
+});
+
+/* ---- 文章 ---- */
+let editingSlug = null;
+let postsCache = [];
+
+async function loadPosts() {
+  const r = await api('GET', '/api/posts');
+  postsCache = r.posts || [];
+  renderPosts();
+}
+function renderPosts() {
+  $('conn').textContent = '●';
+  $('conn').style.color = 'var(--green)';
+  const rows = $('postRows');
+  if (!postsCache.length) { rows.innerHTML = '<div style="color:var(--text);padding:16px 0;text-align:center">还没有文章，点上方按钮写第一篇。</div>'; return; }
+  rows.innerHTML = postsCache.map(p => `
+    <div class="post-row">
+      <div class="ptitle" onclick="editPost('${p.slug}')">${esc(p.title)}${p.draft?' <span style="color:var(--text);font-size:12px">(草稿)</span>':''}</div>
+      ${p.tags.length?p.tags.slice(0,2).map(t=>`<span class="ptag">${esc(t)}</span>`).join(''):''}
+      <span class="pdate">${p.date}</span>
+      <button class="pdel" onclick="delPost('${p.slug}')" title="删除">✕</button>
+    </div>`).join('');
+}
+function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function mdToHtml(md){
+  md = esc(md);
+  // 代码块先处理，内部内容不再解析
+  const blocks = [];
+  md = md.replace(/```(\w*)\n?([\s\S]*?)```/g, (m) => { blocks.push('<pre><code>' + m.replace(/```(\w*)\n?/, '').replace(/```$/, '') + '</code></pre>'); return ' BLOCK' + (blocks.length-1) + ' '; });
+  // 行内代码
+  md = md.replace(/`([^`\n]+)`/g,'<code>$1</code>');
+  // 标题
+  md = md.replace(/^### (.*)$/gm,'<h3>$1</h3>');
+  md = md.replace(/^## (.*)$/gm,'<h2>$1</h2>');
+  md = md.replace(/^# (.*)$/gm,'<h1>$1</h1>');
+  // 引用
+  md = md.replace(/&gt; ?(.*)/gm,'<blockquote>$1</blockquote>');
+  // 加粗 / 斜体
+  md = md.replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>');
+  md = md.replace(/\*([^*]+)\*/g,'<em>$1</em>');
+  // 无序列表
+  const ulLines = md.split(/\n/).map(line => /^- (.*)$/.test(line) ? '<li>' + line.slice(2) + '</li>' : line);
+  md = ulLines.join('\n').replace(/(<li>[\s\S]*?<\/li>)(?!\s*<li>)/g, m => '<ul>' + m + '</ul>');
+  md = md.replace(/<\/ul>\s*<ul>/g, '');
+  // 分割段落
+  md = md.split(/\n{2,}/).map(p => {
+    if (/^<(h1|h2|h3|pre|ul|blockquote)/.test(p)) return p;
+    return '<p>' + p.replace(/\n/g,'<br>') + '</p>';
+  }).join('\n');
+  // 还原代码块
+  md = md.replace(/ BLOCK(\d+) /g, (m,i) => blocks[+i]);
+  return md;
+}
+async function editPost(slug) {
+  $('postList').classList.add('hidden');
+  $('postEditor').classList.remove('hidden');
+  $('editorTitle').textContent = slug ? '编辑文章' : '写新文章';
+  editingSlug = slug;
+  if (slug) {
+    const r = await api('GET', '/api/posts/' + slug);
+    if (r.error) { toast(r.error); return; }
+    const d = r.data || {};
+    $('fSlug').value = slug;
+    $('fTitle').value = d.title || '';
+    $('fDate').value = (d.date||'').slice(0,10);
+    $('fTags').value = (d.tags||[]).join(', ');
+    $('fSummary').value = d.summary || '';
+    $('fCover').value = d.cover || '';
+    $('fDraft').checked = !!d.draft;
+    $('fBody').value = r.body || '';
+  } else {
+    $('fSlug').value='';$('fTitle').value='';$('fDate').value=new Date().toISOString().slice(0,10);
+    $('fTags').value='';$('fSummary').value='';$('fCover').value='';$('fDraft').checked=false;$('fBody').value='';
+  }
+  renderPreview();
+}
+function cancelEdit(){ $('postList').classList.remove('hidden'); $('postEditor').classList.add('hidden'); editingSlug=null; }
+async function savePost() {
+  const slug = $('fSlug').value.trim().replace(/\s+/g,'-');
+  if (!slug) { toast('文件名不能为空'); return; }
+  const body = {
+    slug,
+    data: {
+      title: $('fTitle').value || slug,
+      date: $('fDate').value,
+      tags: $('fTags').value.split(/[,，]/).map(s=>s.trim()).filter(Boolean),
+      summary: $('fSummary').value,
+      cover: $('fCover').value,
+      draft: $('fDraft').checked,
+    },
+    body: $('fBody').value,
+  };
+  const r = await api('POST', '/api/posts', body);
+  if (r.ok) { toast('已保存'); await loadPosts(); editPost(r.slug); }
+  else toast(r.error || '保存失败');
+}
+async function delPost(slug) {
+  if (!confirm('确定删除这篇文章？\n' + slug)) return;
+  const r = await api('DELETE', '/api/posts/' + slug);
+  if (r.ok) { toast('已删除'); await loadPosts(); }
+  else toast(r.error || '删除失败');
+}
+function togglePreview(){ $('editorGrid').classList.toggle('show-preview'); if($('editorGrid').classList.contains('show-preview')) renderPreview(); }
+function renderPreview(){ $('previewBox').innerHTML = mdToHtml($('fBody').value || '*预览内容将显示在这里*'); }
+$('fBody') && ($('fBody').oninput = renderPreview);
+
+/* ---- 主题 ---- */
+let themeData = {};
+const THEME_FIELDS = ['primary','accent','bg','surface','surface2','surface-2','border','text','textStrong','text-strong','textMuted','text-muted','font','fontSize','font-size','lineHeight','line-height','radius','maxWidth','max-width','headerBlur','header-blur'];
+async function loadTheme() {
+  const r = await api('GET', '/api/theme');
+  themeData = r || {};
+  // 兼容 surface-2 / text-strong 等带连字符 key
+  if (!themeData['surface-2'] && themeData.surface2) themeData['surface-2'] = themeData.surface2;
+  if (!themeData['text-strong'] && themeData.textStrong) themeData['text-strong'] = themeData.textStrong;
+  if (!themeData['text-muted'] && themeData.textMuted) themeData['text-muted'] = themeData.textMuted;
+  if (!themeData['font-size'] && themeData.fontSize) themeData['font-size'] = themeData.fontSize;
+  if (!themeData['line-height'] && themeData.lineHeight) themeData['line-height'] = themeData.lineHeight;
+  if (!themeData['max-width'] && themeData.maxWidth) themeData['max-width'] = themeData.maxWidth;
+  if (!themeData['header-blur'] && themeData.headerBlur) themeData['header-blur'] = themeData.headerBlur;
+  bindTheme();
+  renderThemePreview();
+}
+function bindTheme() {
+  const map = {
+    tPrimary:'primary',tAccent:'accent',tBg:'bg',tSurface:'surface',tBorder:'border',
+    tText:'text',tTextStrong:'text-strong',tTextMuted:'text-muted',
+    tFontSize:'font-size',tLineHeight:'line-height',tRadius:'radius',tMaxWidth:'max-width',tFont:'font'
+  };
+  for (const [id, key] of Object.entries(map)) {
+    const el = $(id); if (!el) continue;
+    if (key.includes('-') && themeData[key] !== undefined) { el.value = themeData[key]; }
+    else if (themeData[key] !== undefined) { el.value = themeData[key]; }
+    el.oninput = () => { themeData[key] = el.value; renderThemePreview(); syncThemeInputs(); };
+  }
+  syncThemeInputs();
+}
+function syncThemeInputs() {
+  // 颜色选择器同步
+  const colorMap = [['tPrimary','tPrimaryC'],['tAccent','tAccentC'],['tBg','tBgC'],['tSurface','tSurfaceC'],['tBorder','tBorderC'],['tText','tTextC'],['tTextStrong','tTextStrongC'],['tTextMuted','tTextMutedC']];
+  for (const [hex, picker] of colorMap) {
+    const h = ($(hex).value||'').trim();
+    if (/^#[0-9a-f]{6}$/i.test(h)) $(picker).value = h;
+  }
+}
+function syncColor(hex, picker) {
+  const v = $(picker).value;
+  $(hex).value = v;
+  const map = {tPrimary:'primary',tAccent:'accent',tBg:'bg',tSurface:'surface',tBorder:'border',tText:'text',tTextStrong:'text-strong',tTextMuted:'text-muted'};
+  if (map[hex]) themeData[map[hex]] = v;
+  renderThemePreview();
+}
+function syncHue(range, hex) { const h = parseInt($(range).value); const c = hslToHex(h,80,55); $(hex).value=c; themeData.primary=c; renderThemePreview(); syncThemeInputs(); }
+function syncPx(range, hex, unit) { $(hex).value = $(range).value + unit; themeData[hex==='tFontSize'?'font-size':hex==='tRadius'?'radius':'max-width'] = $(range).value + unit; renderThemePreview(); }
+function syncNum(range, hex) { $(hex).value = $(range).value; themeData['line-height'] = $(range).value; renderThemePreview(); }
+function hslToHex(h,s,l){s/=100;l/=100;const k=n=>(n+h/30)%12;const a=s*Math.min(l,1-l);const f=n=>l-a*Math.max(-1,Math.min(k(n)-3,Math.min(9-k(n),1)));const toHex=x=>Math.round(255*x).toString(16).padStart(2,'0');return'#'+toHex(f(0))+toHex(f(8))+toHex(f(4));}
+function renderThemePreview() {
+  const t = themeData;
+  const pv = $('themePreview');
+  pv.style.setProperty('--pv-primary', t.primary||'#f97316');
+  pv.style.setProperty('--pv-accent', t.accent||'#fb923c');
+  pv.style.setProperty('--pv-text', t.text||'#a1a1aa');
+  pv.style.setProperty('--pv-text-strong', t['text-strong']||'#f4f4f5');
+  pv.style.setProperty('--pv-text-muted', t['text-muted']||'#71717a');
+  pv.style.setProperty('--pv-surface2', t['surface-2']||'#27272a');
+  pv.style.setProperty('--pv-bg', t.bg||'#09090b');
+  pv.style.background = t.bg || '#09090b';
+  pv.style.borderRadius = (t.radius||'14px');
+  pv.style.padding = '20px';
+  pv.style.fontSize = (t['font-size']||'17px');
+  pv.style.lineHeight = (t['line-height']||'1.85');
+  pv.innerHTML = `<h2>标题示例</h2>
+    <p>正文文字示例。这是一段用来预览排版效果的文字，包含 <a href="#">链接样式</a> 和 <code>行内代码</code>。</p>
+    <blockquote>引用块示例：沉舟侧畔千帆过，病树前头万木春。</blockquote>
+    <p><strong>加粗</strong> 与 <em>斜体</em>，还有列表：</p>
+    <ul><li>列表项一</li><li>列表项二</li><li>列表项三</li></ul>`;
+}
+async function saveTheme() {
+  // 归一化 key
+  const clean = {};
+  for (const [k,v] of Object.entries(themeData)) { if (v !== undefined && v !== '') clean[k] = v; }
+  const r = await api('POST', '/api/theme', clean);
+  if (r.ok) toast('主题已保存，前台即时生效');
+  else toast(r.error || '保存失败');
+}
+async function resetTheme() {
+  const def = { primary:'#f97316',accent:'#fb923c',bg:'#09090b',surface:'#18181b','surface-2':'#27272a',border:'#3f3f46',text:'#a1a1aa','text-strong':'#f4f4f5','text-muted':'#71717a',font:'system-ui, -apple-system, \'Segoe UI\', \'PingFang SC\', \'Microsoft YaHei\', sans-serif','font-size':'17px','line-height':'1.85',radius:'14px','max-width':'720px','header-blur':'8px' };
+  const r = await api('POST', '/api/theme', def);
+  if (r.ok) { themeData = def; bindTheme(); renderThemePreview(); toast('已恢复默认'); }
+}
+
+/* ---- git ---- */
+async function refreshGit() {
+  const r = await api('GET', '/api/git');
+  if (r.error) { $('gitStatus').textContent = r.error; $('gitBranch').textContent = ''; return; }
+  $('gitBranch').textContent = '分支: ' + r.branch + (r.hasRemote ? ' · 已配置远程' : ' · 未配置远程仓库');
+  $('gitStatus').textContent = r.status ? r.status : '工作区干净，没有未提交的改动';
+}
+async function doCommit() {
+  const msg = $('gitMsg').value.trim() || '更新博客';
+  const r = await api('POST', '/api/git/commit', { message: msg });
+  if (r.ok) { toast('已提交'); $('gitMsg').value=''; refreshGit(); }
+  else toast(r.error || '提交失败');
+}
+async function doPush() {
+  const r = await api('POST', '/api/git/push');
+  if (r.ok) toast('已推送，GitHub Actions 将自动部署');
+  else toast(r.error || '推送失败，请确认已配置远程仓库');
+}
+
+/* ---- 启动 ---- */
+loadPosts();
+loadTheme();
+</script>
+</body>
+</html>
