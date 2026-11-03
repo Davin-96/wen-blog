@@ -1,0 +1,17 @@
+{
+  "primary": "#f97316",
+  "accent": "#fb923c",
+  "bg": "#09090b",
+  "surface": "#18181b",
+  "surface-2": "#27272a",
+  "border": "#3f3f46",
+  "text": "#a1a1aa",
+  "text-strong": "#f4f4f5",
+  "text-muted": "#71717a",
+  "font": "system-ui, -apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif",
+  "font-size": "17px",
+  "line-height": "1.85",
+  "radius": "14px",
+  "max-width": "720px",
+  "header-blur": "8px"
+}
