@@ -1,0 +1,22 @@
+---
+import { getCollection, render } from 'astro:content';
+import PostCard from '../../layouts/PostCard.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('posts', ({ data }) => !data.draft);
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+const { data } = post;
+const dateStr = data.date.toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' });
+const readTime = Math.max(1, Math.round((post.body?.match(/\S+/g)?.length ?? 300) / 350));
+---
+
+<PostCard post={post}>
+  <Content />
+</PostCard>
