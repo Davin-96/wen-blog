@@ -1,0 +1,183 @@
+/* ===== 主题变量（运行时由 theme.json 注入，此处为兜底） ===== */
+:root {
+  --primary: #f97316;
+  --accent: #fb923c;
+  --bg: #09090b;
+  --surface: #18181b;
+  --surface-2: #27272a;
+  --border: #3f3f46;
+  --text: #a1a1aa;
+  --text-strong: #f4f4f5;
+  --text-muted: #71717a;
+  --font: system-ui, -apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --font-serif: Georgia, 'Songti SC', 'SimSun', serif;
+  --font-mono: 'Cascadia Code', 'Fira Code', Consolas, monospace;
+  --font-size: 17px;
+  --line-height: 1.85;
+  --radius: 14px;
+  --max-width: 720px;
+  --header-blur: 8px;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: var(--font-size);
+  line-height: var(--line-height);
+  -webkit-font-smoothing: antialiased;
+  transition: background 0.4s ease, color 0.4s ease;
+}
+
+a { color: var(--primary); text-decoration: none; transition: color 0.2s; }
+a:hover { color: var(--accent); }
+
+img { max-width: 100%; height: auto; }
+
+/* ===== 排版 ===== */
+h1, h2, h3, h4 {
+  color: var(--text-strong);
+  font-weight: 700;
+  line-height: 1.4;
+  margin: 0 0 0.6em;
+}
+h1 { font-size: 2em; }
+h2 { font-size: 1.5em; margin-top: 1.4em; }
+h3 { font-size: 1.2em; margin-top: 1.2em; }
+h4 { font-size: 1.05em; margin-top: 1em; }
+
+p { margin: 0 0 1em; }
+
+code, pre, kbd, samp {
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+}
+code {
+  background: var(--surface-2);
+  padding: 0.15em 0.4em;
+  border-radius: 4px;
+  color: var(--accent);
+}
+pre {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1em 1.2em;
+  overflow-x: auto;
+  line-height: 1.6;
+}
+pre code { background: none; padding: 0; color: var(--text); }
+
+blockquote {
+  border-left: 3px solid var(--primary);
+  margin: 1em 0;
+  padding: 0.2em 1em;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+ul, ol { padding-left: 1.5em; margin: 0 0 1em; }
+li { margin: 0.3em 0; }
+
+hr { border: none; border-top: 1px solid var(--border); margin: 2em 0; }
+
+table { width: 100%; border-collapse: collapse; margin: 1em 0; font-size: 0.95em; }
+th, td { border: 1px solid var(--border); padding: 0.5em 0.8em; text-align: left; }
+th { background: var(--surface); color: var(--text-strong); }
+
+/* ===== 布局工具 ===== */
+.container { max-width: calc(var(--max-width) + 48px); margin: 0 auto; padding: 0 24px; }
+.container-wide { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+
+/* ===== 顶部导航 ===== */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  backdrop-filter: blur(var(--header-blur));
+  -webkit-backdrop-filter: blur(var(--header-blur));
+  background: color-mix(in srgb, var(--bg) 80%, transparent);
+  border-bottom: 1px solid var(--border);
+  transition: background 0.4s ease;
+}
+.site-header .container { display: flex; align-items: center; justify-content: space-between; height: 56px; }
+.site-logo { display: flex; align-items: center; gap: 8px; font-weight: 700; color: var(--text-strong); font-size: 1.05em; }
+.site-logo svg { width: 24px; height: 24px; color: var(--primary); }
+.nav-links { display: flex; gap: 2px; align-items: center; }
+.nav-links a {
+  color: var(--text-muted);
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.95em;
+  transition: all 0.2s;
+}
+.nav-links a:hover, .nav-links a.active { color: var(--text-strong); background: var(--surface); }
+
+/* ===== 文章卡片 ===== */
+.post-card {
+  display: block;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--surface);
+  transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+}
+.post-card:hover { border-color: var(--primary); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+.post-cover { width: 100%; height: 180px; object-fit: cover; display: block; background: var(--surface-2); }
+.post-card-body { padding: 16px 18px; }
+.post-meta { display: flex; gap: 12px; align-items: center; font-size: 0.85em; color: var(--text-muted); margin-bottom: 8px; }
+.post-meta .tag { background: var(--surface-2); padding: 2px 8px; border-radius: 20px; font-size: 0.85em; color: var(--accent); }
+.post-card h2 { font-size: 1.25em; margin: 0 0 6px; }
+.post-card h2 a { color: var(--text-strong); }
+.post-card h2 a:hover { color: var(--primary); }
+.post-card .summary { color: var(--text-muted); font-size: 0.92em; margin: 0; }
+
+/* ===== 文章详情 ===== */
+.post-header { margin-bottom: 2.5em; padding-bottom: 1.5em; border-bottom: 1px solid var(--border); }
+.post-header h1 { font-size: 2.2em; margin-bottom: 0.3em; }
+.post-header .post-meta { margin-top: 12px; }
+.post-cover-full { width: 100%; border-radius: var(--radius); margin: 1.5em 0; }
+
+/* ===== 归档页年分组 ===== */
+.year-group { margin-bottom: 3em; }
+.year-title { font-size: 1.3em; color: var(--text-strong); margin-bottom: 0.6em; display: flex; align-items: center; gap: 12px; }
+.year-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.month-group { margin-left: 1.2em; }
+.month-title { color: var(--text-muted); font-size: 0.95em; margin: 0.8em 0 0.4em; }
+
+/* ===== 标签 ===== */
+.tag-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 2em 0; }
+.tag-list a { background: var(--surface); border: 1px solid var(--border); padding: 4px 12px; border-radius: 20px; color: var(--text); font-size: 0.88em; }
+.tag-list a:hover { border-color: var(--primary); color: var(--primary); }
+
+/* ===== 页脚 ===== */
+.site-footer { border-top: 1px solid var(--border); margin-top: 4em; padding: 2em 0; color: var(--text-muted); font-size: 0.88em; text-align: center; }
+
+/* ===== 项目卡片 / 友链 ===== */
+.project-card, .link-card {
+  display: block;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 1.2em 1.4em;
+  margin-bottom: 1em;
+  transition: border-color 0.3s;
+}
+.project-card:hover, .link-card:hover { border-color: var(--primary); }
+.project-card h3, .link-card h3 { margin: 0 0 6px; font-size: 1.15em; }
+.project-card h3 a, .link-card h3 a { color: var(--text-strong); }
+.project-card p, .link-card p { margin: 0; color: var(--text-muted); font-size: 0.92em; }
+
+/* ===== 响应式 ===== */
+@media (max-width: 640px) {
+  .nav-links { gap: 0; }
+  .nav-links a { padding: 6px 8px; font-size: 0.88em; }
+  h1 { font-size: 1.7em; }
+  .post-header h1 { font-size: 1.8em; }
+  .month-group { margin-left: 0.6em; }
+}
