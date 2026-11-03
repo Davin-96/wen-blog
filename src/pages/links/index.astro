@@ -1,0 +1,21 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+// 友链列表：工作台可直接编辑此数组维护
+const links = [
+  { name: '龙场茶室', url: 'https://blog.peterchen97.cn', desc: '一只练习时长六年半的 Web 开发练习生，博客排版与栏目结构的参考对象。' },
+];
+---
+
+<BaseLayout title="友链 - 阿文的博客" active="links">
+  <section class="container" style="padding-top: 2.5rem; padding-bottom: 3rem;">
+    <h1 style="font-size: 2em; margin-bottom: 0.2em;">友链</h1>
+    <p style="color: var(--text-muted); margin-top: 0;">值得常去的地方。想交换友链欢迎留言或来信。</p>
+    {links.map((l) => (
+      <a class="link-card" href={l.url} target="_blank" rel="noopener">
+        <h3><a>{l.name}</a></h3>
+        <p>{l.desc}</p>
+      </a>
+    ))}
+  </section>
+</BaseLayout>
