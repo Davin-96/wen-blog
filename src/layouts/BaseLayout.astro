@@ -1,0 +1,62 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+  active?: string;
+}
+const { title, description = '阿文的博客', active } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{title}</title>
+  <meta name="description" content={description} />
+  <script is:inline>
+    // 运行时主题注入：读取 theme.json，写入 CSS 变量
+    (async function () {
+      var t = {};
+      try {
+        var r = await fetch('theme.json', { cache: 'no-cache' });
+        if (r.ok) t = await r.json();
+      } catch (e) { /* 用全局 CSS 兜底变量 */ }
+      var root = document.documentElement;
+      for (var k in t) root.style.setProperty('--' + k, t[k]);
+    })();
+  </script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <a href="/" class="site-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+        </svg>
+        阿文的博客
+      </a>
+      <nav class="nav-links">
+        <a href="/" class={active === 'home' ? 'active' : ''}>首页</a>
+        <a href="/posts/" class={active === 'posts' ? 'active' : ''}>文章</a>
+        <a href="/projects/" class={active === 'projects' ? 'active' : ''}>项目</a>
+        <a href="/links/" class={active === 'links' ? 'active' : ''}>友链</a>
+        <a href="/about/" class={active === 'about' ? 'active' : ''}>关于</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <slot />
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      © {new Date().getFullYear()} 阿文的博客 · 用 Astro 构建
+    </div>
+  </footer>
+</body>
+</html>
